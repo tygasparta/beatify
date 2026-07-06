@@ -45,6 +45,10 @@ function HomePage() {
         </div>
       </div>
 
+      <Section title="Made for you">
+        <RecommendedForYou limit={10} />
+      </Section>
+
       <Section title="Trending in Zimbabwe">
         <div className="scrollbar-none -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2">
           {trending.map((t) => (
