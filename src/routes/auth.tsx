@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Music2, Mail, Apple } from "lucide-react";
 import heroArtist from "@/assets/hero-artist.jpg";
+import { BeatifyLogo } from "@/components/logo";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -101,6 +102,7 @@ function AuthPage() {
         {mode === "welcome" ? (
           <>
             <div className="flex-1 flex flex-col justify-end">
+              <BeatifyLogo size={88} className="mb-6" />
               <h1 className="text-5xl font-black leading-[0.95] tracking-tight">
                 Welcome to<br />
                 <span className="text-gradient-primary">Beatify</span>

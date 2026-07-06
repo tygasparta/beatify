@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Search, Library, Upload, User, BarChart3, Wallet, Bell } from "lucide-react";
 import type { ReactNode } from "react";
 import { MiniPlayer } from "./mini-player";
+import { BeatifyLogo } from "./logo";
 
 const mobileTabs = [
   { to: "/home", label: "Home", icon: Home },
@@ -37,10 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="hidden lg:flex lg:min-h-screen lg:flex-1">
         <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col gap-2 border-r border-border/60 bg-surface/40 px-4 py-6">
           <Link to="/home" className="mb-4 flex items-center gap-2 px-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
-              <Music />
-            </span>
-            <span className="text-lg font-black tracking-tight">Beatify</span>
+            <BeatifyLogo size={36} withWordmark wordmarkClassName="text-xl" />
           </Link>
           <NavGroup items={desktopNav} pathname={pathname} />
           <div className="mt-6 mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -55,6 +53,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile shell */}
       <div className="mx-auto flex min-h-screen w-full max-w-[520px] flex-col bg-background lg:hidden">
+        <Link
+          to="/home"
+          aria-label="Beatify home"
+          className="pointer-events-auto fixed left-4 top-3 z-30 rounded-full bg-background/60 p-1 shadow-glow backdrop-blur"
+        >
+          <BeatifyLogo size={30} />
+        </Link>
         <main className="flex-1 pb-[152px]">{children}</main>
         <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[520px]">
           <MiniPlayer />
