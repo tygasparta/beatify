@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mic, Search as SearchIcon } from "lucide-react";
 import { genres, moods, trendingSearches, demoTracks } from "@/lib/mock-data";
+import { RecommendedForYou } from "@/components/recommended-for-you";
 
 export const Route = createFileRoute("/_authenticated/search")({
   component: SearchPage,
