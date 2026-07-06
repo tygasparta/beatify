@@ -43,14 +43,11 @@ const publishSchema = z.object({
 type ObjInfo = { size: number; mimetype: string | null };
 
 async function fetchObjectInfo(
-  supabase: Awaited<ReturnType<typeof requireSupabaseAuth>> extends never
-    ? never
-    : any,
+  supabase: any,
   bucket: string,
   path: string,
   userId: string,
 ): Promise<ObjInfo | null> {
-  // path is `${uid}/<file>`; ensure caller owns it
   const [ownerId, ...rest] = path.split("/");
   if (ownerId !== userId || rest.length === 0) return null;
   const filename = rest.join("/");
@@ -63,6 +60,7 @@ async function fetchObjectInfo(
   const meta = (match.metadata ?? {}) as { size?: number; mimetype?: string };
   return { size: Number(meta.size ?? 0), mimetype: meta.mimetype ?? null };
 }
+
 
 async function removeObject(supabase: any, bucket: string, path: string) {
   try {
