@@ -38,10 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="hidden lg:flex lg:min-h-screen lg:flex-1">
         <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col gap-2 border-r border-border/60 bg-surface/40 px-4 py-6">
           <Link to="/home" className="mb-4 flex items-center gap-2 px-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
-              <Music />
-            </span>
-            <span className="text-lg font-black tracking-tight">Beatify</span>
+            <BeatifyLogo size={36} withWordmark wordmarkClassName="text-xl" />
           </Link>
           <NavGroup items={desktopNav} pathname={pathname} />
           <div className="mt-6 mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
