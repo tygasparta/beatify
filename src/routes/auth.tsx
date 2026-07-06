@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Music2, Mail, Apple } from "lucide-react";
 import heroArtist from "@/assets/hero-artist.jpg";
+import { BeatifyLogo } from "@/components/logo";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
