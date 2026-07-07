@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Bell, ChevronRight, Play, Search, TrendingUp, Sparkles } from "lucide-react";
+import { Bell, ChevronRight, Play, TrendingUp, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
+import { SearchCommand } from "@/components/search-command";
 import { demoTracks, madeForYou, genres } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
 
