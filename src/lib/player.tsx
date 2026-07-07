@@ -52,7 +52,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (q) setQueue(q);
     setPlaying(true);
     if (isDbTrackId(track.id)) {
-      recordPlay({ data: { trackId: track.id } }).catch(() => {});
+      recordPlay({ data: { trackId: track.id } })
+        .then(() => queryClient.invalidateQueries({ queryKey: ["catalog", "recently-played"] }))
+        .catch(() => {});
     }
     requestAnimationFrame(() => {
       const el = audioRef.current;
