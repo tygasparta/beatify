@@ -140,6 +140,8 @@ function DesktopHome() {
 
   const fetchTrending = useServerFn(getTrendingTracks);
   const fetchNewReleases = useServerFn(getNewReleases);
+  const fetchRecent = useServerFn(getRecentlyPlayed);
+  const { current } = usePlayer();
 
   const trendingQ = useQuery({
     queryKey: ["catalog", "trending", 10],
@@ -151,11 +153,16 @@ function DesktopHome() {
     queryFn: () => fetchNewReleases({ data: { limit: 12 } }),
     staleTime: 60_000,
   });
+  const recentQ = useQuery({
+    queryKey: ["catalog", "recently-played", 8, current?.id ?? null],
+    queryFn: () => fetchRecent({ data: { limit: 8 } }),
+    staleTime: 15_000,
+  });
 
   const trending = (trendingQ.data ?? []).map(dbTrackToTrack);
   const newReleases = (newReleasesQ.data ?? []).map(dbTrackToTrack);
+  const recent = (recentQ.data ?? []).map(dbTrackToTrack);
   const quickPicks = trending.slice(0, 6);
-  const recent = trending.slice(4, 10);
 
   return (
     <div className="hidden md:block">
