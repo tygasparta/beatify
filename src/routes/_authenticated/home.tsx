@@ -260,10 +260,7 @@ function DesktopHome() {
           </div>
           <div className="rounded-2xl bg-surface/60 p-2 ring-1 ring-border">
             {recent.map((t, i) => (
-              <div key={t.id} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/5">
-                <span className="w-5 text-center text-sm text-muted-foreground">{i + 1}</span>
-                <TrackRow track={t} queue={recent} showDuration />
-              </div>
+              <TrackRow key={t.id} track={t} queue={recent} index={i} showDuration />
             ))}
           </div>
         </div>
