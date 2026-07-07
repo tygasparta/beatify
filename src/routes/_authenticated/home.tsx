@@ -133,12 +133,26 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 /* ------------------------------ DESKTOP ------------------------------ */
 function DesktopHome() {
   const { data: profile } = useProfile();
-  const { play } = usePlayer();
   const greeting = greetingByHour();
-  const quickPicks = demoTracks.slice(0, 6);
-  const trending = demoTracks.slice(0, 5);
-  const newReleases = demoTracks.slice(3, 9);
-  const recent = demoTracks.slice(6);
+
+  const fetchTrending = useServerFn(getTrendingTracks);
+  const fetchNewReleases = useServerFn(getNewReleases);
+
+  const trendingQ = useQuery({
+    queryKey: ["catalog", "trending", 10],
+    queryFn: () => fetchTrending({ data: { limit: 10 } }),
+    staleTime: 60_000,
+  });
+  const newReleasesQ = useQuery({
+    queryKey: ["catalog", "new-releases", 12],
+    queryFn: () => fetchNewReleases({ data: { limit: 12 } }),
+    staleTime: 60_000,
+  });
+
+  const trending = (trendingQ.data ?? []).map(dbTrackToTrack);
+  const newReleases = (newReleasesQ.data ?? []).map(dbTrackToTrack);
+  const quickPicks = trending.slice(0, 6);
+  const recent = trending.slice(4, 10);
 
   return (
     <div className="hidden md:block">
