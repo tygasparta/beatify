@@ -8,7 +8,7 @@ import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
 import { demoTracks, madeForYou, genres, type Track } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
-import { getTrendingTracks, getNewReleases } from "@/lib/catalog.functions";
+import { getTrendingTracks, getNewReleases, getRecentlyPlayed } from "@/lib/catalog.functions";
 import { dbTrackToTrack } from "@/lib/track-mapper";
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -140,6 +140,8 @@ function DesktopHome() {
 
   const fetchTrending = useServerFn(getTrendingTracks);
   const fetchNewReleases = useServerFn(getNewReleases);
+  const fetchRecent = useServerFn(getRecentlyPlayed);
+  const { current } = usePlayer();
 
   const trendingQ = useQuery({
     queryKey: ["catalog", "trending", 10],
@@ -151,11 +153,16 @@ function DesktopHome() {
     queryFn: () => fetchNewReleases({ data: { limit: 12 } }),
     staleTime: 60_000,
   });
+  const recentQ = useQuery({
+    queryKey: ["catalog", "recently-played", 8, current?.id ?? null],
+    queryFn: () => fetchRecent({ data: { limit: 8 } }),
+    staleTime: 15_000,
+  });
 
   const trending = (trendingQ.data ?? []).map(dbTrackToTrack);
   const newReleases = (newReleasesQ.data ?? []).map(dbTrackToTrack);
+  const recent = (recentQ.data ?? []).map(dbTrackToTrack);
   const quickPicks = trending.slice(0, 6);
-  const recent = trending.slice(4, 10);
 
   return (
     <div className="hidden md:block">
@@ -244,7 +251,7 @@ function DesktopHome() {
             <button className="text-xs font-semibold text-muted-foreground hover:text-foreground">See all</button>
           </div>
           <div className="rounded-2xl bg-surface/60 p-2 ring-1 ring-border">
-            {trendingQ.isLoading ? (
+            {recentQ.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-2 py-2">
                   <div className="h-11 w-11 animate-pulse rounded-lg bg-surface" />
@@ -259,7 +266,7 @@ function DesktopHome() {
                 Nothing here yet. Play a few tracks to see them show up.
               </div>
             ) : (
-              recent.map((t, i) => (
+              recent.map((t: Track, i: number) => (
                 <TrackRow key={t.id} track={t} queue={recent} index={i} showDuration />
               ))
             )}

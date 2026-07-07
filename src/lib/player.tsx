@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Track } from "./mock-data";
 import { recordPlay } from "./recommendations.functions";
 import { isDbTrackId } from "./track-mapper";
@@ -27,6 +28,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const el = audioRef.current;
@@ -50,7 +52,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (q) setQueue(q);
     setPlaying(true);
     if (isDbTrackId(track.id)) {
-      recordPlay({ data: { trackId: track.id } }).catch(() => {});
+      recordPlay({ data: { trackId: track.id } })
+        .then(() => queryClient.invalidateQueries({ queryKey: ["catalog", "recently-played"] }))
+        .catch(() => {});
     }
     requestAnimationFrame(() => {
       const el = audioRef.current;
