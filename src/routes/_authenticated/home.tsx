@@ -251,7 +251,7 @@ function DesktopHome() {
             <button className="text-xs font-semibold text-muted-foreground hover:text-foreground">See all</button>
           </div>
           <div className="rounded-2xl bg-surface/60 p-2 ring-1 ring-border">
-            {trendingQ.isLoading ? (
+            {recentQ.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-2 py-2">
                   <div className="h-11 w-11 animate-pulse rounded-lg bg-surface" />
