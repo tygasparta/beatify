@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronRight, Play, TrendingUp, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
-import { demoTracks, madeForYou, genres } from "@/lib/mock-data";
+import { demoTracks, madeForYou, genres, type Track } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
+import { getTrendingTracks, getNewReleases } from "@/lib/catalog.functions";
+import { dbTrackToTrack } from "@/lib/track-mapper";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
@@ -133,12 +136,26 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 /* ------------------------------ DESKTOP ------------------------------ */
 function DesktopHome() {
   const { data: profile } = useProfile();
-  const { play } = usePlayer();
   const greeting = greetingByHour();
-  const quickPicks = demoTracks.slice(0, 6);
-  const trending = demoTracks.slice(0, 5);
-  const newReleases = demoTracks.slice(3, 9);
-  const recent = demoTracks.slice(6);
+
+  const fetchTrending = useServerFn(getTrendingTracks);
+  const fetchNewReleases = useServerFn(getNewReleases);
+
+  const trendingQ = useQuery({
+    queryKey: ["catalog", "trending", 10],
+    queryFn: () => fetchTrending({ data: { limit: 10 } }),
+    staleTime: 60_000,
+  });
+  const newReleasesQ = useQuery({
+    queryKey: ["catalog", "new-releases", 12],
+    queryFn: () => fetchNewReleases({ data: { limit: 12 } }),
+    staleTime: 60_000,
+  });
+
+  const trending = (trendingQ.data ?? []).map(dbTrackToTrack);
+  const newReleases = (newReleasesQ.data ?? []).map(dbTrackToTrack);
+  const quickPicks = trending.slice(0, 6);
+  const recent = trending.slice(4, 10);
 
   return (
     <div className="hidden md:block">
@@ -199,38 +216,24 @@ function DesktopHome() {
 
       {/* Trending row */}
       <DesktopRow title="Trending in Zimbabwe" icon={<TrendingUp className="h-4 w-4 text-primary" />}>
-        <div className="grid grid-cols-5 gap-4">
-          {trending.map((t) => (
-            <button key={t.id} onClick={() => play(t, trending)} className="group text-left">
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
-                <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                <span className="absolute bottom-2 right-2 grid h-11 w-11 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                  <Play className="h-4 w-4" fill="currentColor" />
-                </span>
-              </div>
-              <div className="mt-3 truncate text-sm font-bold">{t.title}</div>
-              <div className="truncate text-xs text-muted-foreground">{t.artist}</div>
-            </button>
-          ))}
-        </div>
+        <CoverGrid
+          tracks={trending}
+          cols={5}
+          coverSize={44}
+          loading={trendingQ.isLoading}
+          empty="No trending tracks yet."
+        />
       </DesktopRow>
 
       {/* New releases */}
       <DesktopRow title="New releases">
-        <div className="grid grid-cols-6 gap-4">
-          {newReleases.map((t) => (
-            <button key={t.id} onClick={() => play(t, newReleases)} className="group text-left">
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
-                <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                <span className="absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                  <Play className="h-4 w-4" fill="currentColor" />
-                </span>
-              </div>
-              <div className="mt-2 truncate text-[13px] font-semibold">{t.title}</div>
-              <div className="truncate text-[11px] text-muted-foreground">{t.artist}</div>
-            </button>
-          ))}
-        </div>
+        <CoverGrid
+          tracks={newReleases}
+          cols={6}
+          coverSize={40}
+          loading={newReleasesQ.isLoading}
+          empty="No new releases yet."
+        />
       </DesktopRow>
 
       {/* Genres + Recent listening */}
@@ -241,9 +244,25 @@ function DesktopHome() {
             <button className="text-xs font-semibold text-muted-foreground hover:text-foreground">See all</button>
           </div>
           <div className="rounded-2xl bg-surface/60 p-2 ring-1 ring-border">
-            {recent.map((t, i) => (
-              <TrackRow key={t.id} track={t} queue={recent} index={i} showDuration />
-            ))}
+            {trendingQ.isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-2 py-2">
+                  <div className="h-11 w-11 animate-pulse rounded-lg bg-surface" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-surface" />
+                    <div className="h-2.5 w-1/4 animate-pulse rounded bg-surface" />
+                  </div>
+                </div>
+              ))
+            ) : recent.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                Nothing here yet. Play a few tracks to see them show up.
+              </div>
+            ) : (
+              recent.map((t, i) => (
+                <TrackRow key={t.id} track={t} queue={recent} index={i} showDuration />
+              ))
+            )}
           </div>
         </div>
         <div>
@@ -353,6 +372,87 @@ function QuickPickTile({ track, queue }: { track: import("@/lib/mock-data").Trac
       >
         <Play className="h-4 w-4" fill="currentColor" />
       </button>
+    </div>
+  );
+}
+
+const COLS: Record<number, string> = {
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+  5: "grid-cols-5",
+  6: "grid-cols-6",
+};
+
+function CoverGrid({
+  tracks,
+  cols,
+  coverSize,
+  loading,
+  empty,
+}: {
+  tracks: Track[];
+  cols: 3 | 4 | 5 | 6;
+  coverSize: 40 | 44;
+  loading?: boolean;
+  empty: string;
+}) {
+  const { play, current, isPlaying, toggle } = usePlayer();
+  const gridCls = `grid gap-4 ${COLS[cols]}`;
+  const btnSize = coverSize === 44 ? "h-11 w-11" : "h-10 w-10";
+
+  if (loading) {
+    return (
+      <div className={gridCls} aria-busy>
+        {Array.from({ length: cols }).map((_, i) => (
+          <div key={i}>
+            <div className="aspect-square animate-pulse rounded-2xl bg-surface" />
+            <div className="mt-3 h-3 w-2/3 animate-pulse rounded bg-surface" />
+            <div className="mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-surface" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (tracks.length === 0) {
+    return (
+      <div className="rounded-2xl bg-surface/60 px-6 py-10 text-center text-sm text-muted-foreground ring-1 ring-border">
+        {empty}
+      </div>
+    );
+  }
+
+  return (
+    <div className={gridCls}>
+      {tracks.map((t) => {
+        const isCurrent = current?.id === t.id;
+        return (
+          <div key={t.id} className="group text-left">
+            <button
+              onClick={() => (isCurrent ? toggle() : play(t, tracks))}
+              className="relative block aspect-square w-full overflow-hidden rounded-2xl shadow-card"
+              aria-label={isCurrent && isPlaying ? `Pause ${t.title}` : `Play ${t.title}`}
+            >
+              <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+              <span
+                className={`absolute bottom-2 right-2 grid ${btnSize} place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition ${
+                  isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                }`}
+              >
+                <Play className={coverSize === 44 ? "h-4 w-4" : "h-3.5 w-3.5"} fill="currentColor" />
+              </span>
+            </button>
+            <div className={`mt-3 truncate text-sm font-bold ${isCurrent ? "text-primary" : ""}`}>{t.title}</div>
+            <Link
+              to="/artist/$id"
+              params={{ id: t.artistId }}
+              className="block truncate text-xs text-muted-foreground hover:text-foreground"
+            >
+              {t.artist}
+            </Link>
+          </div>
+        );
+      })}
     </div>
   );
 }
