@@ -359,3 +359,84 @@ function QuickPickTile({ track, queue }: { track: import("@/lib/mock-data").Trac
     </div>
   );
 }
+
+const COLS: Record<number, string> = {
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+  5: "grid-cols-5",
+  6: "grid-cols-6",
+};
+
+function CoverGrid({
+  tracks,
+  cols,
+  coverSize,
+  loading,
+  empty,
+}: {
+  tracks: Track[];
+  cols: 3 | 4 | 5 | 6;
+  coverSize: 40 | 44;
+  loading?: boolean;
+  empty: string;
+}) {
+  const { play, current, isPlaying, toggle } = usePlayer();
+  const gridCls = `grid gap-4 ${COLS[cols]}`;
+  const btnSize = coverSize === 44 ? "h-11 w-11" : "h-10 w-10";
+
+  if (loading) {
+    return (
+      <div className={gridCls} aria-busy>
+        {Array.from({ length: cols }).map((_, i) => (
+          <div key={i}>
+            <div className="aspect-square animate-pulse rounded-2xl bg-surface" />
+            <div className="mt-3 h-3 w-2/3 animate-pulse rounded bg-surface" />
+            <div className="mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-surface" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (tracks.length === 0) {
+    return (
+      <div className="rounded-2xl bg-surface/60 px-6 py-10 text-center text-sm text-muted-foreground ring-1 ring-border">
+        {empty}
+      </div>
+    );
+  }
+
+  return (
+    <div className={gridCls}>
+      {tracks.map((t) => {
+        const isCurrent = current?.id === t.id;
+        return (
+          <div key={t.id} className="group text-left">
+            <button
+              onClick={() => (isCurrent ? toggle() : play(t, tracks))}
+              className="relative block aspect-square w-full overflow-hidden rounded-2xl shadow-card"
+              aria-label={isCurrent && isPlaying ? `Pause ${t.title}` : `Play ${t.title}`}
+            >
+              <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+              <span
+                className={`absolute bottom-2 right-2 grid ${btnSize} place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition ${
+                  isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                }`}
+              >
+                <Play className={coverSize === 44 ? "h-4 w-4" : "h-3.5 w-3.5"} fill="currentColor" />
+              </span>
+            </button>
+            <div className={`mt-3 truncate text-sm font-bold ${isCurrent ? "text-primary" : ""}`}>{t.title}</div>
+            <Link
+              to="/artist/$id"
+              params={{ id: t.artistId }}
+              className="block truncate text-xs text-muted-foreground hover:text-foreground"
+            >
+              {t.artist}
+            </Link>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
