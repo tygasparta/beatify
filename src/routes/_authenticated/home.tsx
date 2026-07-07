@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronRight, Play, TrendingUp, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
-import { demoTracks, madeForYou, genres } from "@/lib/mock-data";
+import { demoTracks, madeForYou, genres, type Track } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
+import { getTrendingTracks, getNewReleases } from "@/lib/catalog.functions";
+import { dbTrackToTrack } from "@/lib/track-mapper";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
