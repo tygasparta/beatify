@@ -266,7 +266,7 @@ function DesktopHome() {
                 Nothing here yet. Play a few tracks to see them show up.
               </div>
             ) : (
-              recent.map((t, i) => (
+              recent.map((t: Track, i: number) => (
                 <TrackRow key={t.id} track={t} queue={recent} index={i} showDuration />
               ))
             )}
