@@ -216,38 +216,25 @@ function DesktopHome() {
 
       {/* Trending row */}
       <DesktopRow title="Trending in Zimbabwe" icon={<TrendingUp className="h-4 w-4 text-primary" />}>
-        <div className="grid grid-cols-5 gap-4">
-          {trending.map((t) => (
-            <button key={t.id} onClick={() => play(t, trending)} className="group text-left">
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
-                <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                <span className="absolute bottom-2 right-2 grid h-11 w-11 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                  <Play className="h-4 w-4" fill="currentColor" />
-                </span>
-              </div>
-              <div className="mt-3 truncate text-sm font-bold">{t.title}</div>
-              <div className="truncate text-xs text-muted-foreground">{t.artist}</div>
-            </button>
-          ))}
-        </div>
+        <CoverGrid
+          tracks={trending}
+          cols={5}
+          coverSize={44}
+          loading={trendingQ.isLoading}
+          empty="No trending tracks yet."
+        />
       </DesktopRow>
 
       {/* New releases */}
       <DesktopRow title="New releases">
-        <div className="grid grid-cols-6 gap-4">
-          {newReleases.map((t) => (
-            <button key={t.id} onClick={() => play(t, newReleases)} className="group text-left">
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
-                <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                <span className="absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                  <Play className="h-4 w-4" fill="currentColor" />
-                </span>
-              </div>
-              <div className="mt-2 truncate text-[13px] font-semibold">{t.title}</div>
-              <div className="truncate text-[11px] text-muted-foreground">{t.artist}</div>
-            </button>
-          ))}
-        </div>
+        <CoverGrid
+          tracks={newReleases}
+          cols={6}
+          coverSize={40}
+          loading={newReleasesQ.isLoading}
+          empty="No new releases yet."
+        />
+      </DesktopRow>
       </DesktopRow>
 
       {/* Genres + Recent listening */}
