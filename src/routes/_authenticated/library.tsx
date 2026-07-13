@@ -32,6 +32,7 @@ import {
   removePlayHistoryEntry,
   deletePlaylist,
   getFollowedArtists,
+  toggleFollowArtist,
   getLibraryCounts,
   getLikedTracks,
   getPlayHistory,
