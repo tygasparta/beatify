@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
-import { SearchCommand } from "@/components/search-command";
+
 import { TrackDetailModal } from "@/components/track-detail-modal";
 import { demoTracks, madeForYou, type Track } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
