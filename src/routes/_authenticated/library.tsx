@@ -124,7 +124,6 @@ function LibraryInner({
   setQuery: (q: string) => void;
   openPlaylist: (id: string) => void;
   closePlaylist: () => void;
-  }) {
 }) {
   const [createOpen, setCreateOpen] = useState(false);
   const fetchCounts = useServerFn(getLibraryCounts);
