@@ -261,10 +261,12 @@ function NavGroup({
 }) {
   return (
     <ul className="flex flex-col gap-0.5">
-      {items.map(({ to, label, icon: Icon, search, matchSearch }) => {
+      {items.map(({ to, label, icon: Icon, search, matchSearch, activeWhen }) => {
         const pathActive = pathname === to || pathname.startsWith(to + "/");
         let active = pathActive;
-        if (pathActive && matchSearch?.tab) {
+        if (pathActive && activeWhen) {
+          active = activeWhen(searchStr);
+        } else if (pathActive && matchSearch?.tab) {
           active = searchStr.includes(`tab=${matchSearch.tab}`);
         } else if (pathActive && to === "/library" && !matchSearch) {
           // "Your Library" root: only when no tab set
