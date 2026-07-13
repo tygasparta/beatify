@@ -221,21 +221,22 @@ export function AppShell({ children }: { children: ReactNode }) {
               {mobileTabs.map(({ to, label, icon: Icon }) => {
                 const active = pathname === to || pathname.startsWith(to + "/");
                 return (
-                  <li key={to}>
+                  <li key={to} className="flex">
                     <Link
                       to={to}
-                      className={`flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition ${
+                      className={`flex w-full flex-col items-center justify-center gap-1 py-3 text-[10px] font-medium leading-none transition ${
                         active ? "text-primary" : "text-muted-foreground"
                       }`}
                     >
-                      <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
-                      {label}
+                      <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.5 : 2} />
+                      <span className="block text-center">{label}</span>
                     </Link>
                   </li>
                 );
               })}
             </ul>
           </nav>
+
         </div>
       </div>
 
