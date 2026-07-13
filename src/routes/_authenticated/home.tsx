@@ -330,33 +330,47 @@ function DesktopHome() {
             </div>
           </div>
 
-          {/* Trending in Zimbabwe — playlist cards */}
-          <RowHeader title="Trending in Zimbabwe" />
+          {/* Trending in Zimbabwe — real tracks from backend */}
+          <div className="mb-4 flex items-baseline justify-between px-8 pt-10">
+            <h2 className="text-lg font-black">Trending in Zimbabwe</h2>
+            <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
+          </div>
           <div className="px-8">
             <div className="grid grid-cols-6 gap-4">
-              {trendingPlaylists.map((p, i) => {
-                const song = trendingRow[i] ?? trendingRow[0];
+              {trendingRow.slice(0, 6).map((t, i) => {
+                const isCurrent = current?.id === t.id;
                 return (
                   <button
-                    key={p.name}
-                    onClick={() => song && play(song, trendingRow)}
+                    key={t.id}
+                    onClick={() => (isCurrent ? toggle() : play(t, trendingRow))}
                     className="group text-left"
                   >
-                    <div className={`relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br ${p.from} ${p.to} p-4 shadow-card`}>
-                      <div className={`text-lg font-black uppercase leading-tight tracking-tight ${p.accent}`}>
-                        {p.tag}
+                    <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
+                      <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-black text-white backdrop-blur">
+                        #{i + 1}
                       </div>
-                      <span className="absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                        <Play className="h-4 w-4" fill="currentColor" />
+                      <span
+                        className={`absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition ${
+                          isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        }`}
+                      >
+                        {isCurrent && isPlaying ? (
+                          <Pause className="h-4 w-4" fill="currentColor" />
+                        ) : (
+                          <Play className="h-4 w-4" fill="currentColor" />
+                        )}
                       </span>
                     </div>
-                    <div className="mt-2 truncate text-sm font-bold">{p.name}</div>
-                    <div className="truncate text-xs text-muted-foreground">{p.songs} songs</div>
+                    <div className={`mt-2 truncate text-sm font-bold ${isCurrent ? "text-primary" : ""}`}>{t.title}</div>
+                    <div className="truncate text-xs text-muted-foreground">{t.artist}</div>
                   </button>
                 );
               })}
             </div>
           </div>
+
 
           {/* Two-column: New Releases + Top Artists */}
           <div className="grid grid-cols-2 gap-6 px-8 pt-10">
