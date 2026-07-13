@@ -16,6 +16,8 @@ type PlayerCtx = {
   next: () => void;
   prev: () => void;
   seek: (fraction: number) => void;
+  playNext: (track: Track) => void;
+  addToQueue: (track: Track) => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
 };
 
