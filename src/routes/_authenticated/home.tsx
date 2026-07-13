@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronRight, Play, Pause, Mail, ChevronDown, ArrowLeft, ArrowRight, Heart, ListPlus, Radio } from "lucide-react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
-import { demoTracks, madeForYou } from "@/lib/mock-data";
+import { TrackDetailModal } from "@/components/track-detail-modal";
+import { demoTracks, madeForYou, type Track } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
 import { getTrendingTracks, getNewReleases, getRecentlyPlayed, getTopArtists } from "@/lib/catalog.functions";
 import { dbTrackToTrack } from "@/lib/track-mapper";
