@@ -143,37 +143,41 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/60 bg-background/70 px-6 backdrop-blur-xl">
-            <SearchCommand className="flex-1 max-w-xl" />
-            <Link
-              to="/notifications"
-              aria-label="Notifications"
-              className="relative grid h-9 w-9 place-items-center rounded-full border border-border/60 bg-white/5 text-foreground transition hover:bg-white/10"
-            >
-              <Bell className="h-4 w-4" />
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full border border-border/60 bg-white/5 py-1 pl-1 pr-3 text-sm font-semibold text-foreground transition hover:bg-white/10">
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
-                  <User className="h-3.5 w-3.5" />
-                </span>
-                Account
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition group-data-[state=open]:rotate-180" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {desktopAccount.map(({ to, label, icon: Icon }) => (
-                  <DropdownMenuItem key={to} asChild>
-                    <Link to={to} className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
-                      {label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <header className="sticky top-0 z-30 grid h-14 grid-cols-[1fr_minmax(0,560px)_1fr] items-center gap-4 border-b border-border/60 bg-background/70 px-6 backdrop-blur-xl">
+            <div className="min-w-0" />
+            <SearchCommand className="w-full" />
+            <div className="flex items-center justify-end gap-2">
+              <Link
+                to="/notifications"
+                aria-label="Notifications"
+                className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border/60 bg-white/5 text-foreground transition hover:bg-white/10"
+              >
+                <Bell className="h-4 w-4" />
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="group flex h-9 shrink-0 items-center gap-2 rounded-full border border-border/60 bg-white/5 pl-1 pr-3 text-sm font-semibold text-foreground transition hover:bg-white/10">
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+                    <User className="h-3.5 w-3.5" />
+                  </span>
+                  Account
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition group-data-[state=open]:rotate-180" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {desktopAccount.map(({ to, label, icon: Icon }) => (
+                    <DropdownMenuItem key={to} asChild>
+                      <Link to={to} className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </header>
+
           <main className="min-w-0 flex-1 pb-28">{children}</main>
         </div>
       </div>
