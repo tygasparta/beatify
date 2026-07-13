@@ -334,6 +334,12 @@ function PlaylistsGrid({
     () => playlists.filter((p) => p.name.toLowerCase().includes(q.trim().toLowerCase())),
     [playlists, q],
   );
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 24,
+    resetKey: q,
+  });
+  const visiblePlaylists = filtered.slice(0, visible);
 
   if (loading) return <LoadingBlock />;
   if (playlists.length === 0)
