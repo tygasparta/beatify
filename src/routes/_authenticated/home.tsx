@@ -251,21 +251,8 @@ function DesktopHome() {
       <div className="grid grid-cols-[1fr_320px] gap-0">
         {/* -------- Center column -------- */}
         <div className="min-w-0">
-          {/* Top bar */}
-          <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border/40 bg-background/80 px-8 py-3 backdrop-blur-xl">
-            <div className="flex gap-1">
-              <NavArrow dir="left" />
-              <NavArrow dir="right" />
-            </div>
-            <SearchCommand className="flex-1" />
-            <button className="relative grid h-9 w-9 place-items-center rounded-full bg-surface/70 ring-1 ring-border transition hover:bg-surface">
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-1.5 top-1.5 grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-black text-primary-foreground">3</span>
-            </button>
-            <button className="grid h-9 w-9 place-items-center rounded-full bg-surface/70 ring-1 ring-border transition hover:bg-surface">
-              <Mail className="h-4 w-4" />
-            </button>
-          </div>
+
+
 
           {/* Hero */}
           <section className="px-8 pt-6">
