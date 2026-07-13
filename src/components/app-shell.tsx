@@ -3,6 +3,7 @@ import { Home, Search, Library, Upload, User, BarChart3, Wallet, Bell, Compass, 
 import type { ReactNode } from "react";
 import { MiniPlayer } from "./mini-player";
 import { BeatifyLogo } from "./logo";
+import { SearchCommand } from "./search-command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,7 +142,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-end gap-3 border-b border-border/60 bg-background/70 px-6 backdrop-blur-xl">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/60 bg-background/70 px-6 backdrop-blur-xl">
+            <SearchCommand className="flex-1 max-w-xl" />
+            <Link
+              to="/notifications"
+              aria-label="Notifications"
+              className="relative grid h-9 w-9 place-items-center rounded-full border border-border/60 bg-white/5 text-foreground transition hover:bg-white/10"
+            >
+              <Bell className="h-4 w-4" />
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full border border-border/60 bg-white/5 py-1 pl-1 pr-3 text-sm font-semibold text-foreground transition hover:bg-white/10">
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
