@@ -377,7 +377,7 @@ function DesktopHome() {
             <div>
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-lg font-black">New Releases</h2>
-                <button className="text-xs font-semibold text-primary hover:brightness-125">See All</button>
+                <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
               </div>
               <div className="grid grid-cols-5 gap-3">
                 {newReleasesList.slice(0, 5).map((t) => {
