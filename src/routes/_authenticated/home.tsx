@@ -348,18 +348,21 @@ function DesktopHome() {
               {trendingRow.slice(0, 6).map((t, i) => {
                 const isCurrent = current?.id === t.id;
                 return (
-                  <button
-                    key={t.id}
-                    onClick={() => (isCurrent ? toggle() : play(t, trendingRow))}
-                    className="group text-left"
-                  >
-                    <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
+                  <div key={t.id} className="group text-left">
+                    <div
+                      onClick={() => openDetail(t, trendingRow)}
+                      className="relative aspect-square cursor-pointer overflow-hidden rounded-2xl shadow-card"
+                    >
                       <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
                       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-black text-white backdrop-blur">
                         #{i + 1}
                       </div>
-                      <span
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          isCurrent ? toggle() : play(t, trendingRow);
+                        }}
                         className={`absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition ${
                           isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                         }`}
@@ -369,11 +372,16 @@ function DesktopHome() {
                         ) : (
                           <Play className="h-4 w-4" fill="currentColor" />
                         )}
-                      </span>
+                      </button>
                     </div>
-                    <div className={`mt-2 truncate text-sm font-bold ${isCurrent ? "text-primary" : ""}`}>{t.title}</div>
+                    <button
+                      onClick={() => openDetail(t, trendingRow)}
+                      className={`mt-2 block w-full truncate text-left text-sm font-bold ${isCurrent ? "text-primary" : ""}`}
+                    >
+                      {t.title}
+                    </button>
                     <div className="truncate text-xs text-muted-foreground">{t.artist}</div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
