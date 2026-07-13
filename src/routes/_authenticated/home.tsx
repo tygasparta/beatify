@@ -171,6 +171,12 @@ function DesktopHome() {
   const fetchRecent = useServerFn(getRecentlyPlayed);
   const fetchTopArtists = useServerFn(getTopArtists);
   const { current, isPlaying, play, toggle } = usePlayer();
+  const [detailTrack, setDetailTrack] = useState<Track | null>(null);
+  const [detailQueue, setDetailQueue] = useState<Track[]>([]);
+  const openDetail = (t: Track, q: Track[]) => {
+    setDetailQueue(q);
+    setDetailTrack(t);
+  };
 
   const trendingQ = useQuery({
     queryKey: ["catalog", "trending", 12],
