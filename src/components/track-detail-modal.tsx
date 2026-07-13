@@ -155,6 +155,37 @@ export function TrackDetailModal({
                   onOpenChange(false);
                 }}
               />
+              {canPlaylist && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium transition hover:bg-white/5">
+                      <ListMusic className="h-4 w-4" />
+                      Add to playlist
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
+                    <DropdownMenuLabel>Your playlists</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setCreateOpen(true); }}>
+                      <Plus className="mr-2 h-4 w-4" /> New playlist
+                    </DropdownMenuItem>
+                    {(playlistsQ.data ?? []).length === 0 && (
+                      <div className="px-2 py-1.5 text-xs text-muted-foreground">No playlists yet</div>
+                    )}
+                    {(playlistsQ.data ?? []).map((p) => (
+                      <DropdownMenuItem
+                        key={p.id}
+                        onSelect={() => {
+                          addToPlaylistMut.mutate({ playlistId: p.id, trackId: track.id, playlistName: p.name });
+                          onOpenChange(false);
+                        }}
+                      >
+                        {p.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <Link
                 to="/artist/$id"
                 params={{ id: track.artistId }}
