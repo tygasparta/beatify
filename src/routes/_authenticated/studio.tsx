@@ -555,7 +555,7 @@ function Stepper({ current }: { current: number }) {
                 >
                   {done ? <Check className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
                 </motion.div>
-                <span className={cn("text-[9px] font-bold uppercase tracking-wider whitespace-nowrap", active ? "text-white" : "text-white/40")}>{label}</span>
+                <span className={cn("hidden lg:inline text-[9px] font-bold uppercase tracking-wider whitespace-nowrap", active ? "text-white" : "text-white/40")}>{label}</span>
               </li>
             );
           })}
