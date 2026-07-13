@@ -205,6 +205,50 @@ function SearchPage() {
             ))}
           </div>
 
+          {/* Sort + duration filters */}
+          <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl bg-surface/40 p-2.5 ring-1 ring-border">
+            <div className="flex items-center gap-2">
+              <label htmlFor="sort" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Sort
+              </label>
+              <select
+                id="sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="rounded-full bg-surface px-3 py-1.5 text-xs font-semibold outline-none ring-1 ring-border focus:ring-primary"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Duration</span>
+              {DURATION_OPTIONS.map((o) => (
+                <button
+                  key={o.id}
+                  onClick={() => setDuration(o.id)}
+                  className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+                    duration === o.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-surface text-muted-foreground ring-1 ring-border hover:text-foreground"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            {hasActiveFilter && (
+              <button
+                onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string; sort: string; duration: string }) => ({ ...prev, sort: "relevant", duration: "any" }), replace: true })}
+                className="ml-auto inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-white/5 hover:text-foreground"
+              >
+                <X className="h-3 w-3" /> Reset filters
+              </button>
+            )}
+          </div>
+
+
           {resultsQ.isLoading && (
             <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Searching…
