@@ -539,7 +539,10 @@ function LikedTab({ q, loading, tracks }: { q: string; loading: boolean; tracks:
       {filtered.length === 0 ? (
         <div className="py-12 text-center text-sm text-muted-foreground">No matches for "{q}".</div>
       ) : (
-        <TrackList tracks={mapped} queue={mapped} onRemove={(t) => unlikeMut.mutate(t.id)} />
+        <>
+          <TrackList tracks={visibleMapped} queue={mapped} onRemove={(t) => unlikeMut.mutate(t.id)} />
+          <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+        </>
       )}
     </div>
   );
