@@ -405,23 +405,30 @@ function DesktopHome() {
             <div>
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-lg font-black">Top Artists</h2>
-                <button className="text-xs font-semibold text-primary hover:brightness-125">See All</button>
+                <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
               </div>
               <div className="grid grid-cols-5 gap-3">
-                {topArtists.map((a, i) => (
-                  <Link
-                    key={a.id}
-                    to="/artist/$id"
-                    params={{ id: a.id }}
-                    className="group text-center"
-                  >
-                    <div className="relative mx-auto aspect-square overflow-hidden rounded-full shadow-card ring-2 ring-border transition group-hover:ring-primary">
-                      <img src={a.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                    </div>
-                    <div className="mt-2 truncate text-xs font-bold">{a.name}</div>
-                    <div className="truncate text-[11px] text-muted-foreground">{(120 - i * 15)}K listeners</div>
-                  </Link>
-                ))}
+                {topArtists.map((a, i) => {
+                  const label = a.listeners > 0
+                    ? a.listeners >= 1000
+                      ? `${(a.listeners / 1000).toFixed(1)}K plays`
+                      : `${a.listeners} plays`
+                    : `#${i + 1} artist`;
+                  return (
+                    <Link
+                      key={a.id}
+                      to="/artist/$id"
+                      params={{ id: a.id }}
+                      className="group text-center"
+                    >
+                      <div className="relative mx-auto aspect-square overflow-hidden rounded-full shadow-card ring-2 ring-border transition group-hover:ring-primary">
+                        <img src={a.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                      </div>
+                      <div className="mt-2 truncate text-xs font-bold">{a.name}</div>
+                      <div className="truncate text-[11px] text-muted-foreground">{label}</div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
