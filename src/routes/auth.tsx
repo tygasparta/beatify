@@ -3,10 +3,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
-import { Music2, Mail, Apple, Play, Headphones, Radio, Sparkles } from "lucide-react";
+import { Music2, Mail, Apple } from "lucide-react";
 import heroArtist from "@/assets/hero-artist.jpg";
-import artistTakura from "@/assets/artist-takura.jpg";
-import coverMafeelings from "@/assets/cover-mafeelings.jpg";
 import { BeatifyLogo } from "@/components/logo";
 
 export const Route = createFileRoute("/auth")({
