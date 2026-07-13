@@ -20,14 +20,12 @@ const searchSchema = z.object({
   duration: fallback(z.string(), "any").default("any"),
 });
 
-type SearchState = z.infer<typeof searchSchema>;
-
-const SORT_OPTIONS: Array<{ id: SearchState["sort"]; label: string }> = [
+const SORT_OPTIONS: Array<{ id: string; label: string }> = [
   { id: "relevant", label: "Most Relevant" },
   { id: "popular", label: "Popular" },
   { id: "newest", label: "Newest" },
 ];
-const DURATION_OPTIONS: Array<{ id: SearchState["duration"]; label: string }> = [
+const DURATION_OPTIONS: Array<{ id: string; label: string }> = [
   { id: "any", label: "Any length" },
   { id: "short", label: "< 2 min" },
   { id: "medium", label: "2–5 min" },
