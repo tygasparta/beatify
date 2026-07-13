@@ -199,6 +199,7 @@ export function TrackDetailModal({
           </div>
         )}
       </DialogContent>
+      <CreatePlaylistDialog open={createOpen} onOpenChange={setCreateOpen} />
     </Dialog>
   );
 }
