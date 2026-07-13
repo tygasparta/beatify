@@ -8,7 +8,7 @@ import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
 import { demoTracks, madeForYou } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
-import { getTrendingTracks, getNewReleases, getRecentlyPlayed } from "@/lib/catalog.functions";
+import { getTrendingTracks, getNewReleases, getRecentlyPlayed, getTopArtists } from "@/lib/catalog.functions";
 import { dbTrackToTrack } from "@/lib/track-mapper";
 import heroArtist from "@/assets/hero-artist.jpg";
 
