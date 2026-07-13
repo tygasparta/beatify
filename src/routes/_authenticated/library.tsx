@@ -556,6 +556,12 @@ function ArtistsTab({ q, loading, artists }: { q: string; loading: boolean; arti
     () => artists.filter((a) => a.name.toLowerCase().includes(q.trim().toLowerCase())),
     [artists, q],
   );
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 24,
+    resetKey: q,
+  });
+  const visibleArtists = filtered.slice(0, visible);
 
   if (loading) return <LoadingBlock />;
   if (artists.length === 0)
@@ -568,37 +574,40 @@ function ArtistsTab({ q, loading, artists }: { q: string; loading: boolean; arti
     );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {filtered.map((a) => (
-        <Link
-          key={a.id}
-          to="/artist/$id"
-          params={{ id: a.id }}
-          className="group flex flex-col items-center gap-3 rounded-2xl bg-surface/60 p-4 text-center ring-1 ring-border transition hover:bg-surface-2"
-        >
-          {a.avatar_url ? (
-            <img src={a.avatar_url} alt="" className="h-28 w-28 rounded-full object-cover ring-1 ring-border" />
-          ) : (
-            <div className="grid h-28 w-28 place-items-center rounded-full bg-primary/20 text-2xl font-black text-primary">
-              {a.name.slice(0, 1).toUpperCase()}
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        {visibleArtists.map((a) => (
+          <Link
+            key={a.id}
+            to="/artist/$id"
+            params={{ id: a.id }}
+            className="group flex flex-col items-center gap-3 rounded-2xl bg-surface/60 p-4 text-center ring-1 ring-border transition hover:bg-surface-2"
+          >
+            {a.avatar_url ? (
+              <img src={a.avatar_url} alt="" className="h-28 w-28 rounded-full object-cover ring-1 ring-border" />
+            ) : (
+              <div className="grid h-28 w-28 place-items-center rounded-full bg-primary/20 text-2xl font-black text-primary">
+                {a.name.slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center justify-center gap-1 truncate text-sm font-bold">
+                {a.name}
+                {a.is_verified && (
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] text-primary-foreground">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {Intl.NumberFormat("en", { notation: "compact" }).format(a.monthly_listeners)} monthly
+              </div>
             </div>
-          )}
-          <div>
-            <div className="flex items-center justify-center gap-1 truncate text-sm font-bold">
-              {a.name}
-              {a.is_verified && (
-                <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] text-primary-foreground">
-                  ✓
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {Intl.NumberFormat("en", { notation: "compact" }).format(a.monthly_listeners)} monthly
-            </div>
-          </div>
-        </Link>
-      ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+    </>
   );
 }
 
