@@ -354,38 +354,41 @@ function PlaylistsGrid({
     );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {/* Create card */}
-      <button
-        onClick={onNew}
-        className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-dashed ring-border transition hover:bg-surface-2"
-      >
-        <div className="grid aspect-square w-full place-items-center rounded-xl bg-surface-2 text-muted-foreground group-hover:text-primary">
-          <Plus className="h-8 w-8" />
-        </div>
-        <div>
-          <div className="truncate text-sm font-bold">New playlist</div>
-          <div className="text-xs text-muted-foreground">Start collecting tracks</div>
-        </div>
-      </button>
-
-      {filtered.map((p) => (
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        {/* Create card */}
         <button
-          key={p.id}
-          onClick={() => onOpen(p.id)}
-          className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-border transition hover:bg-surface-2 hover:shadow-card"
+          onClick={onNew}
+          className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-dashed ring-border transition hover:bg-surface-2"
         >
-          <PlaylistCover cover_url={p.cover_url} thumbs={p.cover_thumbs} name={p.name} />
+          <div className="grid aspect-square w-full place-items-center rounded-xl bg-surface-2 text-muted-foreground group-hover:text-primary">
+            <Plus className="h-8 w-8" />
+          </div>
           <div>
-            <div className="truncate text-sm font-bold">{p.name}</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {p.is_public ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-              <span>{p.track_count} tracks</span>
-            </div>
+            <div className="truncate text-sm font-bold">New playlist</div>
+            <div className="text-xs text-muted-foreground">Start collecting tracks</div>
           </div>
         </button>
-      ))}
-    </div>
+
+        {visiblePlaylists.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => onOpen(p.id)}
+            className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-border transition hover:bg-surface-2 hover:shadow-card"
+          >
+            <PlaylistCover cover_url={p.cover_url} thumbs={p.cover_thumbs} name={p.name} />
+            <div>
+              <div className="truncate text-sm font-bold">{p.name}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {p.is_public ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                <span>{p.track_count} tracks</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+    </>
   );
 }
 
