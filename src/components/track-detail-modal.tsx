@@ -74,7 +74,7 @@ export function TrackDetailModal({
             </div>
 
             <div className="flex items-center justify-between px-5 pt-4 text-xs text-muted-foreground">
-              <span>{track.genre ?? "—"}</span>
+              <span>{track.plays ? `${track.plays} plays` : "New"}</span>
               <span>{track.duration ? fmt(track.duration) : ""}</span>
             </div>
 
