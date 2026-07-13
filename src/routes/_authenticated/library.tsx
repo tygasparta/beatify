@@ -26,6 +26,7 @@ import {
 import { usePlayer } from "@/lib/player";
 import { dbTrackToTrack } from "@/lib/track-mapper";
 import type { Track } from "@/lib/mock-data";
+import { useInfiniteVisible } from "@/hooks/use-infinite-visible";
 import {
   clearPlayHistory,
   deletePlaylist,
