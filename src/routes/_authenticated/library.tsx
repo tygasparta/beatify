@@ -26,6 +26,7 @@ import {
 import { usePlayer } from "@/lib/player";
 import { dbTrackToTrack } from "@/lib/track-mapper";
 import type { Track } from "@/lib/mock-data";
+import { useInfiniteVisible } from "@/hooks/use-infinite-visible";
 import {
   clearPlayHistory,
   deletePlaylist,
@@ -74,6 +75,21 @@ import { Button } from "@/components/ui/button";
 
 const tabs = ["Playlists", "Liked", "Artists", "Albums", "History"] as const;
 type Tab = (typeof tabs)[number];
+
+function InfiniteSentinel({
+  sentinelRef,
+  hasMore,
+}: {
+  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  hasMore: boolean;
+}) {
+  if (!hasMore) return null;
+  return (
+    <div ref={sentinelRef} className="flex items-center justify-center py-6">
+      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/library")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -334,6 +350,12 @@ function PlaylistsGrid({
     () => playlists.filter((p) => p.name.toLowerCase().includes(q.trim().toLowerCase())),
     [playlists, q],
   );
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 24,
+    resetKey: q,
+  });
+  const visiblePlaylists = filtered.slice(0, visible);
 
   if (loading) return <LoadingBlock />;
   if (playlists.length === 0)
@@ -347,38 +369,41 @@ function PlaylistsGrid({
     );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {/* Create card */}
-      <button
-        onClick={onNew}
-        className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-dashed ring-border transition hover:bg-surface-2"
-      >
-        <div className="grid aspect-square w-full place-items-center rounded-xl bg-surface-2 text-muted-foreground group-hover:text-primary">
-          <Plus className="h-8 w-8" />
-        </div>
-        <div>
-          <div className="truncate text-sm font-bold">New playlist</div>
-          <div className="text-xs text-muted-foreground">Start collecting tracks</div>
-        </div>
-      </button>
-
-      {filtered.map((p) => (
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        {/* Create card */}
         <button
-          key={p.id}
-          onClick={() => onOpen(p.id)}
-          className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-border transition hover:bg-surface-2 hover:shadow-card"
+          onClick={onNew}
+          className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-dashed ring-border transition hover:bg-surface-2"
         >
-          <PlaylistCover cover_url={p.cover_url} thumbs={p.cover_thumbs} name={p.name} />
+          <div className="grid aspect-square w-full place-items-center rounded-xl bg-surface-2 text-muted-foreground group-hover:text-primary">
+            <Plus className="h-8 w-8" />
+          </div>
           <div>
-            <div className="truncate text-sm font-bold">{p.name}</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {p.is_public ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-              <span>{p.track_count} tracks</span>
-            </div>
+            <div className="truncate text-sm font-bold">New playlist</div>
+            <div className="text-xs text-muted-foreground">Start collecting tracks</div>
           </div>
         </button>
-      ))}
-    </div>
+
+        {visiblePlaylists.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => onOpen(p.id)}
+            className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 text-left ring-1 ring-border transition hover:bg-surface-2 hover:shadow-card"
+          >
+            <PlaylistCover cover_url={p.cover_url} thumbs={p.cover_thumbs} name={p.name} />
+            <div>
+              <div className="truncate text-sm font-bold">{p.name}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {p.is_public ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                <span>{p.track_count} tracks</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+    </>
   );
 }
 
@@ -473,6 +498,12 @@ function LikedTab({ q, loading, tracks }: { q: string; loading: boolean; tracks:
     [tracks, q],
   );
   const mapped = filtered.map(dbTrackToTrack);
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 30,
+    resetKey: q,
+  });
+  const visibleMapped = mapped.slice(0, visible);
   const { play } = usePlayer();
 
   if (loading) return <LoadingBlock />;
@@ -508,7 +539,10 @@ function LikedTab({ q, loading, tracks }: { q: string; loading: boolean; tracks:
       {filtered.length === 0 ? (
         <div className="py-12 text-center text-sm text-muted-foreground">No matches for "{q}".</div>
       ) : (
-        <TrackList tracks={mapped} queue={mapped} onRemove={(t) => unlikeMut.mutate(t.id)} />
+        <>
+          <TrackList tracks={visibleMapped} queue={mapped} onRemove={(t) => unlikeMut.mutate(t.id)} />
+          <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+        </>
       )}
     </div>
   );
@@ -522,6 +556,12 @@ function ArtistsTab({ q, loading, artists }: { q: string; loading: boolean; arti
     () => artists.filter((a) => a.name.toLowerCase().includes(q.trim().toLowerCase())),
     [artists, q],
   );
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 24,
+    resetKey: q,
+  });
+  const visibleArtists = filtered.slice(0, visible);
 
   if (loading) return <LoadingBlock />;
   if (artists.length === 0)
@@ -534,37 +574,40 @@ function ArtistsTab({ q, loading, artists }: { q: string; loading: boolean; arti
     );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {filtered.map((a) => (
-        <Link
-          key={a.id}
-          to="/artist/$id"
-          params={{ id: a.id }}
-          className="group flex flex-col items-center gap-3 rounded-2xl bg-surface/60 p-4 text-center ring-1 ring-border transition hover:bg-surface-2"
-        >
-          {a.avatar_url ? (
-            <img src={a.avatar_url} alt="" className="h-28 w-28 rounded-full object-cover ring-1 ring-border" />
-          ) : (
-            <div className="grid h-28 w-28 place-items-center rounded-full bg-primary/20 text-2xl font-black text-primary">
-              {a.name.slice(0, 1).toUpperCase()}
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        {visibleArtists.map((a) => (
+          <Link
+            key={a.id}
+            to="/artist/$id"
+            params={{ id: a.id }}
+            className="group flex flex-col items-center gap-3 rounded-2xl bg-surface/60 p-4 text-center ring-1 ring-border transition hover:bg-surface-2"
+          >
+            {a.avatar_url ? (
+              <img src={a.avatar_url} alt="" className="h-28 w-28 rounded-full object-cover ring-1 ring-border" />
+            ) : (
+              <div className="grid h-28 w-28 place-items-center rounded-full bg-primary/20 text-2xl font-black text-primary">
+                {a.name.slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center justify-center gap-1 truncate text-sm font-bold">
+                {a.name}
+                {a.is_verified && (
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] text-primary-foreground">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {Intl.NumberFormat("en", { notation: "compact" }).format(a.monthly_listeners)} monthly
+              </div>
             </div>
-          )}
-          <div>
-            <div className="flex items-center justify-center gap-1 truncate text-sm font-bold">
-              {a.name}
-              {a.is_verified && (
-                <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] text-primary-foreground">
-                  ✓
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {Intl.NumberFormat("en", { notation: "compact" }).format(a.monthly_listeners)} monthly
-            </div>
-          </div>
-        </Link>
-      ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+    </>
   );
 }
 
@@ -580,6 +623,12 @@ function AlbumsTab({ q, loading, albums }: { q: string; loading: boolean; albums
       }),
     [albums, q],
   );
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 24,
+    resetKey: q,
+  });
+  const visibleAlbums = filtered.slice(0, visible);
 
   if (loading) return <LoadingBlock />;
   if (albums.length === 0)
@@ -592,36 +641,39 @@ function AlbumsTab({ q, loading, albums }: { q: string; loading: boolean; albums
     );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {filtered.map((a) => (
-        <Link
-          key={a.key}
-          to="/search"
-          search={{ q: a.album, genre: "", tab: "songs", sort: "relevant", duration: "any" }}
-          className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 ring-1 ring-border transition hover:bg-surface-2"
-        >
-          {a.cover_url ? (
-            <img src={a.cover_url} alt="" className="aspect-square w-full rounded-xl object-cover shadow-card" />
-          ) : (
-            <div className="grid aspect-square w-full place-items-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 shadow-card">
-              <Music2 className="h-1/3 w-1/3 text-white/90" />
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        {visibleAlbums.map((a) => (
+          <Link
+            key={a.key}
+            to="/search"
+            search={{ q: a.album, genre: "", tab: "songs", sort: "relevant", duration: "any" }}
+            className="group flex flex-col gap-3 rounded-2xl bg-surface/60 p-3 ring-1 ring-border transition hover:bg-surface-2"
+          >
+            {a.cover_url ? (
+              <img src={a.cover_url} alt="" className="aspect-square w-full rounded-xl object-cover shadow-card" />
+            ) : (
+              <div className="grid aspect-square w-full place-items-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 shadow-card">
+                <Music2 className="h-1/3 w-1/3 text-white/90" />
+              </div>
+            )}
+            <div>
+              <div className="truncate text-sm font-bold">{a.album}</div>
+              <Link
+                to="/artist/$id"
+                params={{ id: a.artist_id }}
+                onClick={(e) => e.stopPropagation()}
+                className="truncate text-xs text-muted-foreground hover:text-foreground"
+              >
+                {a.artist_name}
+              </Link>
+              <div className="text-xs text-muted-foreground">{a.track_count} tracks</div>
             </div>
-          )}
-          <div>
-            <div className="truncate text-sm font-bold">{a.album}</div>
-            <Link
-              to="/artist/$id"
-              params={{ id: a.artist_id }}
-              onClick={(e) => e.stopPropagation()}
-              className="truncate text-xs text-muted-foreground hover:text-foreground"
-            >
-              {a.artist_name}
-            </Link>
-            <div className="text-xs text-muted-foreground">{a.track_count} tracks</div>
-          </div>
-        </Link>
-      ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
+    </>
   );
 }
 
@@ -657,6 +709,11 @@ function HistoryTab({
   );
   const mapped = filtered.map(dbTrackToTrack);
   const { current, isPlaying, play, toggle } = usePlayer();
+  const { visible, sentinelRef, hasMore } = useInfiniteVisible({
+    total: filtered.length,
+    pageSize: 30,
+    resetKey: q,
+  });
 
   if (loading) return <LoadingBlock />;
   if (entries.length === 0)
@@ -684,7 +741,7 @@ function HistoryTab({
         </button>
       </div>
       <ul className="overflow-hidden rounded-2xl bg-surface/40 ring-1 ring-border">
-        {filtered.map((t, i) => {
+        {filtered.slice(0, visible).map((t, i) => {
           const track = mapped[i];
           const isCurrent = current?.id === t.id;
           return (
@@ -722,6 +779,7 @@ function HistoryTab({
           );
         })}
       </ul>
+      <InfiniteSentinel sentinelRef={sentinelRef} hasMore={hasMore} />
     </div>
   );
 }
