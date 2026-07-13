@@ -244,12 +244,22 @@ function DesktopAuth(p: DesktopProps) {
             <button
               type="submit"
               disabled={p.loading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110 disabled:opacity-50"
+              className="mt-2 w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:opacity-50"
             >
-              <Mail className="h-4 w-4" />
               {p.loading ? "Please wait…" : p.isSignup ? "Create account" : "Log in"}
             </button>
           </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {p.isSignup ? "Already have an account?" : "New to Beatify?"}{" "}
+            <button
+              type="button"
+              onClick={() => p.setIsSignup(!p.isSignup)}
+              className="font-semibold text-foreground hover:text-primary"
+            >
+              {p.isSignup ? "Log in" : "Sign up"}
+            </button>
+          </p>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             By continuing you agree to Beatify's{" "}
