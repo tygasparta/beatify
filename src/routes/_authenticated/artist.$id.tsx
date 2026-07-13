@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, MessageSquare, MoreHorizontal, Play, Shuffle } from "lucide-react";
+import { ChevronLeft, MessageSquare, MoreHorizontal, Play, Shuffle, Check } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { demoTracks } from "@/lib/mock-data";
 import { TrackRow } from "@/components/track-row";
 import { usePlayer } from "@/lib/player";
+import { getFollowedArtists, toggleFollowArtist } from "@/lib/library.functions";
 
 export const Route = createFileRoute("/_authenticated/artist/$id")({
   component: ArtistPage,
@@ -14,6 +18,24 @@ function ArtistPage() {
   const shown = tracks.length ? tracks : demoTracks.slice(0, 5);
   const artist = shown[0];
   const { play } = usePlayer();
+  const queryClient = useQueryClient();
+
+  const fetchFollowed = useServerFn(getFollowedArtists);
+  const doToggleFollow = useServerFn(toggleFollowArtist);
+  const followedQ = useQuery({
+    queryKey: ["library", "followed-artists"],
+    queryFn: () => fetchFollowed(),
+    staleTime: 30_000,
+  });
+  const isFollowing = (followedQ.data ?? []).some((a) => a.id === id);
+  const followMut = useMutation({
+    mutationFn: () => doToggleFollow({ data: { artistId: id } }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["library"] });
+      toast.success(res.following ? `Following ${artist.artist}` : `Unfollowed ${artist.artist}`);
+    },
+    onError: () => toast.error("Couldn't update follow"),
+  });
 
   return (
     <div className="pb-6">
@@ -39,8 +61,22 @@ function ArtistPage() {
 
       <div className="px-5">
         <div className="mb-6 flex items-center gap-2">
-          <button className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-glow">
-            Follow
+          <button
+            onClick={() => followMut.mutate()}
+            disabled={followMut.isPending}
+            className={
+              isFollowing
+                ? "flex items-center gap-1.5 rounded-full border border-border px-5 py-2 text-sm font-semibold"
+                : "rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-glow"
+            }
+          >
+            {isFollowing ? (
+              <>
+                <Check className="h-4 w-4" /> Following
+              </>
+            ) : (
+              "Follow"
+            )}
           </button>
           <button className="grid h-11 w-11 place-items-center rounded-full text-muted-foreground">
             <MoreHorizontal className="h-5 w-5" />
