@@ -123,22 +123,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="shrink-0 border-t border-border/50 pt-3">
+            <div className="mt-1 mb-2 flex items-center gap-1.5 px-3 text-primary">
+              <Crown className="h-3 w-3" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Go Premium</span>
+            </div>
             <Link
               to="/premium"
               className="relative block overflow-hidden rounded-xl border border-primary/35 bg-primary/10 p-3.5 transition hover:border-primary/60 hover:bg-primary/15"
             >
-              <div className="relative">
-                <div className="mb-1.5 flex items-center gap-1.5 text-primary">
-                  <Crown className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Go Premium</span>
-                </div>
-                <p className="text-[11px] leading-snug text-muted-foreground">
-                  Ad-free music, offline listening and more.
-                </p>
-                <span className="mt-3 block w-full rounded-lg bg-primary py-2 text-center text-xs font-bold text-primary-foreground shadow-glow transition hover:brightness-110">
-                  Upgrade Now
-                </span>
-              </div>
+              <p className="text-[11px] leading-snug text-muted-foreground">
+                Ad-free music, offline listening and more.
+              </p>
+              <span className="mt-3 block w-full rounded-lg bg-primary py-2 text-center text-xs font-bold text-primary-foreground shadow-glow transition hover:brightness-110">
+                Upgrade Now
+              </span>
             </Link>
           </div>
         </aside>
