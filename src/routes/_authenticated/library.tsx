@@ -70,6 +70,13 @@ function LibraryPage() {
     <div className="px-5 pt-14 md:px-10 md:pt-8">
       {header}
 
+      {search.playlist && (
+        <div className="mb-5 flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3 ring-1 ring-primary/30">
+          <ListMusic className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Viewing playlist: <span className="text-primary">{search.playlist}</span></span>
+        </div>
+      )}
+
       {/* Mobile / tablet stacked */}
       <div className="md:hidden">
         <div className="space-y-2">
