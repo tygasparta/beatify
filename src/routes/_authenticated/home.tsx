@@ -557,17 +557,8 @@ function RowHeader({ title }: { title: string }) {
   );
 }
 
-function NavArrow({ dir }: { dir: "left" | "right" }) {
-  const Icon = dir === "left" ? ArrowLeft : ArrowRight;
-  return (
-    <button
-      className="grid h-8 w-8 place-items-center rounded-full bg-surface/70 text-muted-foreground ring-1 ring-border transition hover:text-foreground"
-      aria-label={dir === "left" ? "Back" : "Forward"}
-    >
-      <Icon className="h-4 w-4" />
-    </button>
-  );
-}
+
+
 
 function EqBars({ active = true }: { active?: boolean }) {
   return (
