@@ -1,11 +1,22 @@
+import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Play, Pause, Heart, ListPlus, ListStart, User } from "lucide-react";
+import { Play, Pause, Heart, ListMusic, ListPlus, ListStart, Plus, User } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { usePlayer } from "@/lib/player";
 import { getLikedIds, toggleLike } from "@/lib/recommendations.functions";
+import { addTrackToPlaylist, listMyPlaylists } from "@/lib/library.functions";
+import { CreatePlaylistDialog } from "@/components/create-playlist-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { isDbTrackId } from "@/lib/track-mapper";
 import type { Track } from "@/lib/mock-data";
 
@@ -45,11 +56,31 @@ export function TrackDetailModal({
     onError: () => toast.error("Couldn't update like"),
   });
 
+  const fetchPlaylists = useServerFn(listMyPlaylists);
+  const doAddToPlaylist = useServerFn(addTrackToPlaylist);
+  const [createOpen, setCreateOpen] = useState(false);
+  const playlistsQ = useQuery({
+    queryKey: ["library", "playlists"],
+    queryFn: () => fetchPlaylists(),
+    staleTime: 15_000,
+  });
+  const addToPlaylistMut = useMutation({
+    mutationFn: (vars: { playlistId: string; trackId: string; playlistName: string }) =>
+      doAddToPlaylist({ data: { playlistId: vars.playlistId, trackId: vars.trackId } }),
+    onSuccess: (res, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["library"] });
+      if (res.added) toast.success(`Added to "${vars.playlistName}"`);
+      else toast.info(`Already in "${vars.playlistName}"`);
+    },
+    onError: () => toast.error("Couldn't add to playlist"),
+  });
+
   const open = track !== null;
   const isCurrent = track && current?.id === track.id;
   const isThisPlaying = isCurrent && isPlaying;
   const liked = track ? likedIds.has(track.id) : false;
   const canLike = track && isDbTrackId(track.id);
+  const canPlaylist = track && isDbTrackId(track.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,6 +155,37 @@ export function TrackDetailModal({
                   onOpenChange(false);
                 }}
               />
+              {canPlaylist && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium transition hover:bg-white/5">
+                      <ListMusic className="h-4 w-4" />
+                      Add to playlist
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
+                    <DropdownMenuLabel>Your playlists</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setCreateOpen(true); }}>
+                      <Plus className="mr-2 h-4 w-4" /> New playlist
+                    </DropdownMenuItem>
+                    {(playlistsQ.data ?? []).length === 0 && (
+                      <div className="px-2 py-1.5 text-xs text-muted-foreground">No playlists yet</div>
+                    )}
+                    {(playlistsQ.data ?? []).map((p) => (
+                      <DropdownMenuItem
+                        key={p.id}
+                        onSelect={() => {
+                          addToPlaylistMut.mutate({ playlistId: p.id, trackId: track.id, playlistName: p.name });
+                          onOpenChange(false);
+                        }}
+                      >
+                        {p.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <Link
                 to="/artist/$id"
                 params={{ id: track.artistId }}
@@ -137,6 +199,7 @@ export function TrackDetailModal({
           </div>
         )}
       </DialogContent>
+      <CreatePlaylistDialog open={createOpen} onOpenChange={setCreateOpen} />
     </Dialog>
   );
 }
