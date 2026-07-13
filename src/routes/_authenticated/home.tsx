@@ -552,6 +552,11 @@ function DesktopHome() {
           </div>
         </aside>
       </div>
+      <TrackDetailModal
+        track={detailTrack}
+        queue={detailQueue}
+        onOpenChange={(o) => !o && setDetailTrack(null)}
+      />
     </div>
   );
 }
