@@ -48,7 +48,7 @@ const moodColors = [
 ];
 
 function SearchPage() {
-  const { q, genre, tab } = Route.useSearch();
+  const { q, genre, tab, sort, duration } = Route.useSearch();
   const navigate = useNavigate({ from: "/search" });
   const [input, setInput] = useState(q);
   const [debounced, setDebounced] = useState(q);
@@ -58,21 +58,18 @@ function SearchPage() {
   const runSearch = useServerFn(searchCatalog);
   const fetchTopArtists = useServerFn(getTopArtists);
 
-  // Sync input when URL q changes externally (e.g. clicking a trending chip)
   useEffect(() => setInput(q), [q]);
 
-  // Debounce input -> update URL and query
   useEffect(() => {
     const id = setTimeout(() => {
       setDebounced(input.trim());
       if (input.trim() !== q) {
-        navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, q: input.trim() }), replace: true });
+        navigate({ search: (prev) => ({ ...prev, q: input.trim() }), replace: true });
       }
     }, 250);
     return () => clearTimeout(id);
   }, [input]);
 
-  // Load recents from localStorage once
   useEffect(() => {
     try {
       const raw = localStorage.getItem(RECENTS_KEY);
@@ -102,8 +99,8 @@ function SearchPage() {
   const hasQuery = debounced.length >= 1 || genre.length >= 1;
 
   const resultsQ = useQuery({
-    queryKey: ["search-page", debounced, genre, 24],
-    queryFn: () => runSearch({ data: { q: debounced, genre, limit: 24 } }),
+    queryKey: ["search-page", debounced, genre, sort, duration, 24],
+    queryFn: () => runSearch({ data: { q: debounced, genre, limit: 24, sort, duration } }),
     enabled: hasQuery,
     staleTime: 30_000,
   });
@@ -125,18 +122,25 @@ function SearchPage() {
   const submitSearch = (term: string) => {
     pushRecent(term);
     setInput(term);
-    navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, q: term, genre: "" }), replace: false });
+    navigate({ search: (prev) => ({ ...prev, q: term, genre: "" }), replace: false });
   };
 
   const applyGenre = (g: string) => {
-    navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, genre: g, q: "" }), replace: false });
+    navigate({ search: (prev) => ({ ...prev, genre: g, q: "" }), replace: false });
     setInput("");
   };
 
   const clearAll = () => {
     setInput("");
-    navigate({ search: () => ({ q: "", genre: "", tab: "all" }), replace: true });
+    navigate({ search: () => ({ q: "", genre: "", tab: "all", sort: "relevant", duration: "any" }), replace: true });
   };
+
+  const setSort = (v: string) => navigate({ search: (prev) => ({ ...prev, sort: v }), replace: true });
+  const setDuration = (v: string) => navigate({ search: (prev) => ({ ...prev, duration: v }), replace: true });
+
+  const hasActiveFilter = sort !== "relevant" || duration !== "any";
+
+
 
   return (
     <div className="mx-auto max-w-5xl px-5 pt-14 md:px-8 md:pt-10">
