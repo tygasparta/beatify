@@ -467,23 +467,23 @@ function StudioPage() {
         </div>
 
         {/* Bottom action bar */}
-        <div className="sticky bottom-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-t border-white/[0.06] bg-black/85 px-6 backdrop-blur-xl">
-          <div className="flex items-center gap-2">
+        <div className="sticky bottom-0 z-30 flex h-16 shrink-0 items-center justify-between gap-2 border-t border-white/[0.06] bg-black/85 px-3 md:px-6 backdrop-blur-xl">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={goPrev}
               disabled={step === 1}
-              className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 disabled:opacity-30"
+              className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 md:px-4 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 disabled:opacity-30"
             >
-              <ChevronLeft className="h-3.5 w-3.5" /> Previous
+              <ChevronLeft className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Previous</span>
             </button>
-            <button className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white/70 hover:bg-white/10">
+            <button className="hidden md:flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white/70 hover:bg-white/10">
               <Save className="h-3.5 w-3.5" /> Save Draft
             </button>
-            <button className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white/50 hover:bg-white/10">
+            <button className="hidden lg:flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold text-white/50 hover:bg-white/10">
               <Trash2 className="h-3.5 w-3.5" /> Discard
             </button>
           </div>
-          <div className="text-[11px] text-white/40">
+          <div className="hidden md:block text-[11px] text-white/40 truncate">
             Step <span className="text-white font-bold">{step}</span> of 10 · {STEPS[step - 1].label}
           </div>
           <div>
