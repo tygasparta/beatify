@@ -176,7 +176,7 @@ function SearchPage() {
         <div className="mb-4 flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Filtering by</span>
           <button
-            onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, genre: "" }) })}
+            onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string; sort: string; duration: string }) => ({ ...prev, genre: "" }) })}
             className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary ring-1 ring-primary/30"
           >
             {genre}
@@ -193,7 +193,7 @@ function SearchPage() {
             {(["all", "songs", "artists"] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, tab: t }) })}
+                onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string; sort: string; duration: string }) => ({ ...prev, tab: t }) })}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold capitalize transition ${
                   tab === t
                     ? "bg-primary text-primary-foreground"
