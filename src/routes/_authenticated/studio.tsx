@@ -371,19 +371,19 @@ function StudioPage() {
       {/* Main workspace */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-black/40 px-5 backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-black tracking-wide">Create Release</div>
-            <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/60">BETA</span>
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-black/40 px-4 md:px-5 backdrop-blur-xl">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="text-sm font-black tracking-wide truncate">Create Release</div>
+            <span className="hidden sm:inline rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/60">BETA</span>
           </div>
-          <div className="ml-6 flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 flex-1 max-w-md">
+          <div className="hidden xl:flex ml-6 items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 flex-1 max-w-md">
             <Search className="h-3.5 w-3.5 text-white/40" />
             <input placeholder="Search Studio…" className="bg-transparent text-xs text-white/80 outline-none flex-1 placeholder:text-white/30" />
             <span className="text-[10px] text-white/30">⌘K</span>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2 shrink-0">
             {autoSavedAt && (
-              <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-white/50">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#00C853] animate-pulse" />
                 Autosaved
               </div>
@@ -400,7 +400,7 @@ function StudioPage() {
         <div className="flex min-h-0 flex-1">
           {/* Center workspace */}
           <div className="min-w-0 flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-4xl px-8 py-8 pb-32">
+            <div className="mx-auto max-w-4xl px-4 md:px-6 lg:px-8 py-6 md:py-8 pb-32">
               <Stepper current={step} />
               <AnimatePresence mode="wait">
                 <motion.div
