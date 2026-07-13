@@ -123,6 +123,16 @@ function StudioPage() {
   const [step, setStep] = useState(1);
   const [collapsed, setCollapsed] = useState(false);
 
+  // Auto-collapse the Studio sidebar on tablet widths so the workspace doesn't feel cramped
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 1279px)");
+    const apply = () => setCollapsed(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   // Data
   const [releaseType, setReleaseType] = useState<ReleaseType>("single");
   const [tracks, setTracks] = useState<TrackFile[]>([]);
