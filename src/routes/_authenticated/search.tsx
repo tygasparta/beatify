@@ -52,7 +52,7 @@ function SearchPage() {
     const id = setTimeout(() => {
       setDebounced(input.trim());
       if (input.trim() !== q) {
-        navigate({ search: (prev) => ({ ...prev, q: input.trim() }), replace: true });
+        navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, q: input.trim() }), replace: true });
       }
     }, 250);
     return () => clearTimeout(id);
@@ -69,7 +69,7 @@ function SearchPage() {
   const pushRecent = (term: string) => {
     const t = term.trim();
     if (!t) return;
-    setRecents((prev) => {
+    setRecents((prev: { q: string; genre: string; tab: string }) => {
       const next = [t, ...prev.filter((r) => r.toLowerCase() !== t.toLowerCase())].slice(0, 8);
       try {
         localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
@@ -111,11 +111,11 @@ function SearchPage() {
   const submitSearch = (term: string) => {
     pushRecent(term);
     setInput(term);
-    navigate({ search: (prev) => ({ ...prev, q: term, genre: "" }), replace: false });
+    navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, q: term, genre: "" }), replace: false });
   };
 
   const applyGenre = (g: string) => {
-    navigate({ search: (prev) => ({ ...prev, genre: g, q: "" }), replace: false });
+    navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, genre: g, q: "" }), replace: false });
     setInput("");
   };
 
@@ -158,7 +158,7 @@ function SearchPage() {
         <div className="mb-4 flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Filtering by</span>
           <button
-            onClick={() => navigate({ search: (prev) => ({ ...prev, genre: "" }) })}
+            onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, genre: "" }) })}
             className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary ring-1 ring-primary/30"
           >
             {genre}
@@ -175,7 +175,7 @@ function SearchPage() {
             {(["all", "songs", "artists"] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => navigate({ search: (prev) => ({ ...prev, tab: t }) })}
+                onClick={() => navigate({ search: (prev: { q: string; genre: string; tab: string }) => ({ ...prev, tab: t }) })}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold capitalize transition ${
                   tab === t
                     ? "bg-primary text-primary-foreground"
