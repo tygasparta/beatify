@@ -751,14 +751,24 @@ function PlaylistDetailView({ playlistId, onClose }: { playlistId: string; onClo
   });
 
   const renameMut = useMutation({
-    mutationFn: (vars: { name: string; is_public?: boolean }) =>
-      doRename({ data: { id: playlistId, name: vars.name, is_public: vars.is_public } }),
+    mutationFn: (vars: { name: string; description?: string; is_public?: boolean }) =>
+      doRename({
+        data: {
+          id: playlistId,
+          name: vars.name,
+          description: vars.description,
+          is_public: vars.is_public,
+        },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["library"] });
-      toast.success("Playlist updated");
     },
     onError: () => toast.error("Couldn't update playlist"),
   });
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<Track | null>(null);
 
   const deleteMut = useMutation({
     mutationFn: () => doDelete({ data: { id: playlistId } }),
