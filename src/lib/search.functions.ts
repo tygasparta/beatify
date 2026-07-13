@@ -4,20 +4,26 @@ import type { RecTrack } from "./recommendations.functions";
 
 export type SearchArtist = { id: string; name: string; cover_url: string | null };
 export type SearchGenre = { name: string; track_count: number };
-export type SearchResults = { tracks: RecTrack[]; artists: SearchArtist[]; genres: SearchGenre[] };
+export type SearchResults = {
+  tracks: RecTrack[];
+  artists: SearchArtist[];
+  genres: SearchGenre[];
+  nextOffset: number | null;
+};
 
 export const searchCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { q?: string; genre?: string; limit?: number; sort?: string; duration?: string }) => ({
+  .inputValidator((data: { q?: string; genre?: string; limit?: number; offset?: number; sort?: string; duration?: string }) => ({
     q: (data.q ?? "").trim().slice(0, 80),
     genre: (data.genre ?? "").trim().slice(0, 40),
     limit: Math.min(Math.max(data.limit ?? 12, 1), 50),
+    offset: Math.max(data.offset ?? 0, 0),
     sort: (["relevant", "newest", "popular"].includes(data.sort ?? "") ? data.sort : "relevant") as "relevant" | "newest" | "popular",
     duration: (["any", "short", "medium", "long"].includes(data.duration ?? "") ? data.duration : "any") as "any" | "short" | "medium" | "long",
   }))
   .handler(async ({ data, context }): Promise<SearchResults> => {
     const { supabase } = context;
-    if (data.q.length < 1 && data.genre.length < 1) return { tracks: [], artists: [], genres: [] };
+    if (data.q.length < 1 && data.genre.length < 1) return { tracks: [], artists: [], genres: [], nextOffset: null };
 
     let query = supabase
       .from("tracks")
@@ -38,15 +44,20 @@ export const searchCatalog = createServerFn({ method: "GET" })
 
     if (data.sort === "newest") query = query.order("created_at", { ascending: false });
     else if (data.sort === "popular") query = query.order("play_count", { ascending: false });
-    else query = query.order("play_count", { ascending: false }); // "relevant" — ilike ordered by popularity as tiebreaker
+    else query = query.order("play_count", { ascending: false });
+    // Stable tiebreaker so paginated pages don't overlap
+    query = query.order("id", { ascending: true });
 
-    const { data: tracks, error } = await query.limit(data.limit);
+    const from = data.offset;
+    const to = data.offset + data.limit - 1;
+    const { data: tracks, error } = await query.range(from, to);
     if (error) throw error;
 
+    const rows = tracks ?? [];
     const artistMap = new Map<string, SearchArtist>();
     const genreMap = new Map<string, number>();
     const qLower = data.q.toLowerCase();
-    for (const t of tracks ?? []) {
+    for (const t of rows) {
       if (data.q.length >= 1 && !artistMap.has(t.artist_id) && t.artist_name.toLowerCase().includes(qLower)) {
         artistMap.set(t.artist_id, { id: t.artist_id, name: t.artist_name, cover_url: t.cover_url });
       }
@@ -56,11 +67,12 @@ export const searchCatalog = createServerFn({ method: "GET" })
     }
 
     return {
-      tracks: (tracks ?? []) as RecTrack[],
+      tracks: rows as RecTrack[],
       artists: Array.from(artistMap.values()).slice(0, 6),
       genres: Array.from(genreMap.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 4)
         .map(([name, track_count]) => ({ name, track_count })),
+      nextOffset: rows.length === data.limit ? data.offset + data.limit : null,
     };
   });
