@@ -8,7 +8,7 @@ import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
 import { demoTracks, madeForYou } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
-import { getTrendingTracks, getNewReleases, getRecentlyPlayed } from "@/lib/catalog.functions";
+import { getTrendingTracks, getNewReleases, getRecentlyPlayed, getTopArtists } from "@/lib/catalog.functions";
 import { dbTrackToTrack } from "@/lib/track-mapper";
 import heroArtist from "@/assets/hero-artist.jpg";
 
@@ -167,22 +167,28 @@ function DesktopHome() {
   const fetchTrending = useServerFn(getTrendingTracks);
   const fetchNewReleases = useServerFn(getNewReleases);
   const fetchRecent = useServerFn(getRecentlyPlayed);
+  const fetchTopArtists = useServerFn(getTopArtists);
   const { current, isPlaying, play, toggle } = usePlayer();
 
   const trendingQ = useQuery({
-    queryKey: ["catalog", "trending", 6],
-    queryFn: () => fetchTrending({ data: { limit: 6 } }),
+    queryKey: ["catalog", "trending", 12],
+    queryFn: () => fetchTrending({ data: { limit: 12 } }),
     staleTime: 60_000,
   });
   const newReleasesQ = useQuery({
-    queryKey: ["catalog", "new-releases", 5],
-    queryFn: () => fetchNewReleases({ data: { limit: 5 } }),
+    queryKey: ["catalog", "new-releases", 10],
+    queryFn: () => fetchNewReleases({ data: { limit: 10 } }),
     staleTime: 60_000,
   });
   const recentQ = useQuery({
     queryKey: ["catalog", "recently-played", 6, current?.id ?? null],
     queryFn: () => fetchRecent({ data: { limit: 6 } }),
     staleTime: 15_000,
+  });
+  const topArtistsQ = useQuery({
+    queryKey: ["catalog", "top-artists", 5],
+    queryFn: () => fetchTopArtists({ data: { limit: 5 } }),
+    staleTime: 60_000,
   });
 
   const trending = (trendingQ.data ?? []).map(dbTrackToTrack);
@@ -194,9 +200,16 @@ function DesktopHome() {
   const newReleasesList = newReleases.length > 0 ? newReleases : demoTracks.slice(3, 8);
   const trendingRow = trending.length > 0 ? trending.slice(0, 6) : demoTracks.slice(0, 6);
 
-  const topArtists = Array.from(
-    new Map(demoTracks.map((t) => [t.artistId, { id: t.artistId, name: t.artist, cover: t.cover }])).values()
-  ).slice(0, 5);
+  const topArtists = (topArtistsQ.data && topArtistsQ.data.length > 0)
+    ? topArtistsQ.data.map((a) => ({
+        id: a.id,
+        name: a.name,
+        cover: a.cover ?? demoTracks.find((t) => t.artistId === a.id)?.cover ?? demoTracks[0].cover,
+        listeners: a.plays,
+      }))
+    : Array.from(
+        new Map(demoTracks.map((t) => [t.artistId, { id: t.artistId, name: t.artist, cover: t.cover, listeners: 0 }])).values()
+      ).slice(0, 5);
 
   // Build the mix from recent listening (shuffled), falling back to trending/demo
   const mixQueue = (() => {
@@ -317,40 +330,54 @@ function DesktopHome() {
             </div>
           </div>
 
-          {/* Trending in Zimbabwe — playlist cards */}
-          <RowHeader title="Trending in Zimbabwe" />
+          {/* Trending in Zimbabwe — real tracks from backend */}
+          <div className="mb-4 flex items-baseline justify-between px-8 pt-10">
+            <h2 className="text-lg font-black">Trending in Zimbabwe</h2>
+            <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
+          </div>
           <div className="px-8">
             <div className="grid grid-cols-6 gap-4">
-              {trendingPlaylists.map((p, i) => {
-                const song = trendingRow[i] ?? trendingRow[0];
+              {trendingRow.slice(0, 6).map((t, i) => {
+                const isCurrent = current?.id === t.id;
                 return (
                   <button
-                    key={p.name}
-                    onClick={() => song && play(song, trendingRow)}
+                    key={t.id}
+                    onClick={() => (isCurrent ? toggle() : play(t, trendingRow))}
                     className="group text-left"
                   >
-                    <div className={`relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br ${p.from} ${p.to} p-4 shadow-card`}>
-                      <div className={`text-lg font-black uppercase leading-tight tracking-tight ${p.accent}`}>
-                        {p.tag}
+                    <div className="relative aspect-square overflow-hidden rounded-2xl shadow-card">
+                      <img src={t.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-black text-white backdrop-blur">
+                        #{i + 1}
                       </div>
-                      <span className="absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-glow transition group-hover:opacity-100">
-                        <Play className="h-4 w-4" fill="currentColor" />
+                      <span
+                        className={`absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition ${
+                          isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        }`}
+                      >
+                        {isCurrent && isPlaying ? (
+                          <Pause className="h-4 w-4" fill="currentColor" />
+                        ) : (
+                          <Play className="h-4 w-4" fill="currentColor" />
+                        )}
                       </span>
                     </div>
-                    <div className="mt-2 truncate text-sm font-bold">{p.name}</div>
-                    <div className="truncate text-xs text-muted-foreground">{p.songs} songs</div>
+                    <div className={`mt-2 truncate text-sm font-bold ${isCurrent ? "text-primary" : ""}`}>{t.title}</div>
+                    <div className="truncate text-xs text-muted-foreground">{t.artist}</div>
                   </button>
                 );
               })}
             </div>
           </div>
 
+
           {/* Two-column: New Releases + Top Artists */}
           <div className="grid grid-cols-2 gap-6 px-8 pt-10">
             <div>
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-lg font-black">New Releases</h2>
-                <button className="text-xs font-semibold text-primary hover:brightness-125">See All</button>
+                <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
               </div>
               <div className="grid grid-cols-5 gap-3">
                 {newReleasesList.slice(0, 5).map((t) => {
@@ -378,23 +405,30 @@ function DesktopHome() {
             <div>
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-lg font-black">Top Artists</h2>
-                <button className="text-xs font-semibold text-primary hover:brightness-125">See All</button>
+                <Link to="/search" className="text-xs font-semibold text-primary hover:brightness-125">See All</Link>
               </div>
               <div className="grid grid-cols-5 gap-3">
-                {topArtists.map((a, i) => (
-                  <Link
-                    key={a.id}
-                    to="/artist/$id"
-                    params={{ id: a.id }}
-                    className="group text-center"
-                  >
-                    <div className="relative mx-auto aspect-square overflow-hidden rounded-full shadow-card ring-2 ring-border transition group-hover:ring-primary">
-                      <img src={a.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
-                    </div>
-                    <div className="mt-2 truncate text-xs font-bold">{a.name}</div>
-                    <div className="truncate text-[11px] text-muted-foreground">{(120 - i * 15)}K listeners</div>
-                  </Link>
-                ))}
+                {topArtists.map((a, i) => {
+                  const label = a.listeners > 0
+                    ? a.listeners >= 1000
+                      ? `${(a.listeners / 1000).toFixed(1)}K plays`
+                      : `${a.listeners} plays`
+                    : `#${i + 1} artist`;
+                  return (
+                    <Link
+                      key={a.id}
+                      to="/artist/$id"
+                      params={{ id: a.id }}
+                      className="group text-center"
+                    >
+                      <div className="relative mx-auto aspect-square overflow-hidden rounded-full shadow-card ring-2 ring-border transition group-hover:ring-primary">
+                        <img src={a.cover} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />
+                      </div>
+                      <div className="mt-2 truncate text-xs font-bold">{a.name}</div>
+                      <div className="truncate text-[11px] text-muted-foreground">{label}</div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
