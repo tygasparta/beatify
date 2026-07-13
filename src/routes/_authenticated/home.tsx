@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TrackRow } from "@/components/track-row";
 import { RecommendedForYou } from "@/components/recommended-for-you";
 import { SearchCommand } from "@/components/search-command";
-import { demoTracks, madeForYou, type Track } from "@/lib/mock-data";
+import { demoTracks, madeForYou } from "@/lib/mock-data";
 import { usePlayer } from "@/lib/player";
 import { getTrendingTracks, getNewReleases, getRecentlyPlayed } from "@/lib/catalog.functions";
 import { dbTrackToTrack } from "@/lib/track-mapper";
@@ -497,5 +497,3 @@ function greetingByHour() {
   return "Good Evening";
 }
 
-// Suppress unused import warnings for the Track type
-export type _Unused = Track;
