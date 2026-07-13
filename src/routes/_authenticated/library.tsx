@@ -741,7 +741,7 @@ function HistoryTab({
         </button>
       </div>
       <ul className="overflow-hidden rounded-2xl bg-surface/40 ring-1 ring-border">
-        {filtered.map((t, i) => {
+        {filtered.slice(0, visible).map((t, i) => {
           const track = mapped[i];
           const isCurrent = current?.id === t.id;
           return (
